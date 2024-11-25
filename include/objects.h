@@ -1,5 +1,6 @@
 #pragma once
 
 typedef struct JsonObj {
-	data
+	char *key;
+	char *value;
 } JsonObj;

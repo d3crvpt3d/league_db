@@ -3,6 +3,14 @@
 #include <string.h>
 #include <sys/types.h>
 
+#include "../include/objects.h"
+#include "../include/char_switch.h"
+
+//info:
+//we can do var = strtok(NULL, text, delimiter),
+//where var will be &text[x]
+
+
 //if token is "name" then copy next token to *name
 void getValues(char *name, char *depth, char *token, int wasitem){
 	
@@ -38,7 +46,11 @@ int main(int argc, char **argv){
 
 	//Read file into buffer
 	FILE *fptr;
-	fptr = fopen("test_items.json", "r");
+	fptr = fopen(argv[1], "r");
+	if(!fptr){
+		printf("No such File %s\n", argv[1]);
+		return -1;
+	}
 	fseek(fptr, 0L, SEEK_END);
 	int size = ftell(fptr); 
 	char *text = malloc(sizeof(char) * size+1);
@@ -49,47 +61,12 @@ int main(int argc, char **argv){
 	fclose(fptr);
 
 	//pre things for token loop
-	char *token = strtok(text, "\"");
+	char token = text[0];
 	u_int32_t jdepth = 0;
-
-	//item values
-	//malloc to free
-	char *itemId = malloc(1);
-	char *itemName = malloc(1);
-	char *itemDepth = malloc(1);
-	int wasitem = 0;
 
 	//go through each token
 	while(token != NULL){
-	
-		//keep track of json-depth
-		if (strcmp(token, "{")){
-			jdepth++;
-
-			//first entry
-			if(jdepth == 2){
-				itemId = strtok(NULL, "\"");
-			}
-
-		}else if (strcmp(token, "}")){
-
-			//if item ended
-			if(jdepth == 2 && wasitem){
-				printf("INSERT INTO item VALUES (%s,$$%s$$,%s);\n", itemId, itemName, itemDepth);//never do this!!!
-				//reset itemdepth
-				itemDepth = "1";
-				wasitem = 0;
-			}
-
-			jdepth--;
-		}
-
-		switch (jdepth){
-			case 2: getId(itemId, token); break;
-			case 3: getValues(itemName, itemDepth, token, wasitem); break;
-		}
-
-		token = strtok(NULL, "\"");
+		char_switch();
 	}
 
 	free(text);
