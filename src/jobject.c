@@ -1,18 +1,18 @@
-#include "../include/jobject.h"
 #include <stdlib.h>
 
-struct JObject *createJObject(struct Value v){
+#include "../include/jobject.h"
+
+struct JObject *createJObject(){
 	
 	//get memory for this object
 	struct JObject *this = malloc(sizeof(struct JObject));
 
 	//insert first key/data pair into child array
-	this->array = malloc(sizeof(struct Value));
+	this->array = malloc(sizeof(struct Element));
 	if(!this->array){
 		return NULL;//cant malloc
 	}
-	this->array[0] = v;
-	this->size = 1;
+	this->length = 0;
 	this->space = 1;
 
 	return this;
@@ -21,17 +21,17 @@ struct JObject *createJObject(struct Value v){
 //free childs, then yourself (recursive)
 int deleteJObject(struct JObject *obj){
 
-	//if data of parent was not a object
-	if(!obj){
-		return 0;
-	}
-	
-	//delete all objects from parent
-	for(int i = 0; i < obj->size; i++){
-	
-		if(!deleteJObject(obj->array[i].data.obj)){
-			return -3;
+	//recursive call for childs that are obj
+	for(int i = 0; i < obj->length; i++){
+
+		if(obj->array[i].is_obj){
+		
+			if(!deleteJObject(obj->array[i].value)){
+				return -3;
+			}
+		
 		}
+
 	}
 
 	//free array memory
@@ -43,26 +43,28 @@ int deleteJObject(struct JObject *obj){
 	return 0;
 }
 
-int appendToJObject(struct JObject *obj, struct Value value){
+int appendToJObject(struct JObject *obj, struct Element e){
 
-	struct Value *tmp = 0;
+	struct Element *tmp = 0;
 
 	//realloc if full
-	if(obj->space == obj->size){
+	if(obj->space == obj->length){
 
 		//double space
 		obj->space = obj->space < 1;
 		tmp = realloc(obj->array, obj->space);
+	
+		//check if realloc was successful
+		if(!tmp){
+			obj->space = obj->space > 1;
+			return -1;
+		}
 	}
 
-	//check if realloc was successful
-	if(!tmp){
-		return -1;
-	}
 	obj->array = tmp;
 
-	//insert value and increment size
-	obj->array[obj->size++] = value;
+	//insert value and increment length
+	obj->array[obj->length++] = e;
 
 	return 0;
 }

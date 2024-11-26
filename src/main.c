@@ -1,10 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <sys/types.h>
 
-#include "../include/objects.h"
-#include "../include/jstack.h"
+#include "../include/jobject.h"
+
 
 int main(int argc, char **argv){
 
@@ -29,20 +28,24 @@ int main(int argc, char **argv){
 
 	//parse json
 	char in_string = 0;
-
-	//stack for json
-	struct JStack jstack = {0};
+	char *currKey = 0;
+	void *currData = 0;
+	struct JObject *currObj = 0;
 
 	//root obj
-	struct Json root = malloc(sizeof(struct Json));
+	struct JObject *root = createJObject();
 
-	for(int i = 0; text[i] != 0; i++){
+	currObj = root;
+
+	//skip first '{'
+	for(int i = 1; text[i] != 0; i++){
 
 		switch(c){
 		
 			//start of object
 			case '{':
 				//create new object as child of current
+				appendToJObject(&currObj, {});
 				break;
 		
 			//end of object

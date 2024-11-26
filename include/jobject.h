@@ -1,28 +1,27 @@
 #pragma once
 
-#include <sys/types.h>
-
-struct Data {
-	char *string;
-	struct JObject *obj;
-};
-
-struct Value {
+struct Element {
 	char *key;
-	struct Data data;
+	void *value;	
+	int is_obj;
 };
 
 struct JObject {
+	
+	//array
 	long space;
-	u_int size;
-	struct Value *array;
+	long length;
+	struct Element *array;//dyn array of key/value pairs
+
+	//parent back prop.
+	struct JObject *parent;
 };
 
 //malloc's itself with key
-struct JObject *createJObject(struct Value v);
+struct JObject *createJObject(void);
 
 //free's recusively childs and itself
 int deleteJObject(struct JObject *obj);
 
 //insert
-int appendToJObject(struct JObject *, struct Value);
+int appendToJObject(struct JObject *, struct Element);
