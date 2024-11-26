@@ -35,9 +35,14 @@ int main(int argc, char **argv){
 
 	//parse json
 	char in_string = 0;
+	char Comma_Colon = 0;
+	
 	char *currKey = 0;
 	void *currVal = 0;
-	struct JObject *currObj = 0;
+	char *strStart = 0;
+	char is_obj = 0;
+	
+	struct JObject *currObj = createJObject();
 	struct JObject *currParent = 0;
 
 	//root obj
@@ -48,49 +53,48 @@ int main(int argc, char **argv){
 	//skip first '{'
 	for(u_int32_t i = 1; text[i] != 0; i++){
 
-		switch(text[i]){
+		//dont interpret if in string
+		if(in_string){
+
+			//end of string
+			if(text[i] == '"'){
+				in_string = 0;
+				text[i] = '\0';
+			}
+			continue;
+		}
+
+		switch (text[i]){
 		
-			//start of object
-			case '{':
-				//declare object / start of child
-				
-				break;
-			//next obj/string/etc is value for currKey
-			case ':':
-				bools.
-				
-				//
-
-				break;
-			//end of object and child
-			case '}':
-
-				//append object or string value
-				if(currObj){
-					appendToJObject(currParent, (struct Element){currKey, currVal, 1});
-				}else{
-					;
-				}
-
-				//pop back to parent
-
-
-				break;
-		
-			//save key/value string	
+			//start of string
 			case '"':
-				//toggle bool
-				in_string ^= in_string;
+				in_string=1;
+				strStart = &text[i]+1;//first character of literal
+				break;
 
+			//string in front was a key
+			case ':':
+				Comma_Colon = 1;//colon last
+				currKey = strStart;
 				break;
-		
+
+			//obj to parent and create new child
+			case '{':
+				currParent = currObj;
+				currObj = createJObject();
+				
+				currObj->parent = currParent;
+				break;
+
+			//end of value
 			case ',':
-				//child done
-				appendToJObject(currObj, (struct Element){currKey,currVal,0});
+				Comma_Colon = 0;//comma last
+				appendToJObject(currObj, (struct Element){currKey, strStart, is_obj});
 				break;
-			
-			default:
-				continue;
+
+			case '}':
+				is_obj = 1;
+				break;
 		}
 
 	}

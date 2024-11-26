@@ -14,6 +14,7 @@ struct JObject *createJObject(){
 	}
 	this->length = 0;
 	this->space = 1;
+	this->parent = 0;
 
 	return this;
 }
