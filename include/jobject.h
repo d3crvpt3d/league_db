@@ -1,22 +1,28 @@
 #pragma once
 
-//int, double, char*
-union Value {
-	int 	as_integer;
-	float 	as_decimal;
-	char 	*as_string;
+#include <sys/types.h>
+
+struct Data {
+	char *string;
+	struct JObject *obj;
+};
+
+struct Value {
+	char *key;
+	struct Data data;
 };
 
 struct JObject {
-	char *key;
-	union Value value;
-
-	//dyn alloc
-	struct JObject *childs;
+	long space;
+	u_int size;
+	struct Value *array;
 };
 
 //malloc's itself with key
-struct JObject *createJObject(char *key);
+struct JObject *createJObject(struct Value v);
 
 //free's recusively childs and itself
-int deleteJObject(struct JObject *jobject);
+int deleteJObject(struct JObject *obj);
+
+//insert
+int appendToJObject(struct JObject *, struct Value);
