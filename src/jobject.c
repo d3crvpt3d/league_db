@@ -150,3 +150,18 @@ int parseObject(JObject *object){
 
 	return 0;
 }
+
+int recursiveParseObject(JObject *obj){
+
+	if(!obj->is_obj){
+		return 0;
+	}
+
+	parseObject(obj);
+
+	for(u_int64_t i = 0; i < obj->length; i++){
+		recursiveParseObject(obj->value[i]);
+	}
+
+	return 0;
+}

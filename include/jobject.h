@@ -19,3 +19,7 @@ int deleteJObject(JObject *obj);
 
 //insert
 int appendToJObject(JObject *, JObject *);
+
+int parseObject(JObject *object);
+	
+int recursiveParseObject(JObject *obj);
