@@ -42,13 +42,13 @@ int main(int argc, char **argv){
 	char is_obj = 0;
 	
 	//root obj
-	JObject *root;
+	JObject root;
 	
 	//init root
-	initJObject(root, NULL, text);
+	initJObject(&root, NULL, text);
 
 	//recursive parse raw from childs
-	recursiveParseJObject(root);
+	recursiveParseJObject(&root);
 
 	free(text);
 	return 0;

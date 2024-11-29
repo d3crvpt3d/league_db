@@ -1,9 +1,11 @@
 #pragma once
 
+#include <sys/types.h>
+
 typedef struct JObject {
 	char *raw;//raw string to be parsed
 
-	int is_obj: 1;//true if raw[0] == '{'
+	u_int8_t is_obj: 1;//true if raw[0] == '{'
 	long space;
 	long length;
 	

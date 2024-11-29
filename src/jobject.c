@@ -15,7 +15,7 @@ char *trim(char *in){
 	}
 	
 	//trim front
-	while (in[front++] == ' ' || in[front] == '\n' || in[front] == '\r' || in[front] == '\t'){
+	while (in[front] == ' ' || in[front] == '\n' || in[front] == '\r' || in[front] == '\t'){
 		front++;
 	}
 
