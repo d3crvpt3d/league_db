@@ -22,4 +22,4 @@ int appendToJObject(JObject *, JObject *);
 
 int parseObject(JObject *object);
 	
-int recursiveParseObject(JObject *obj);
+int recursiveParseJObject(JObject *obj);

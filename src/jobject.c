@@ -151,7 +151,7 @@ int parseObject(JObject *object){
 	return 0;
 }
 
-int recursiveParseObject(JObject *obj){
+int recursiveParseJObject(JObject *obj){
 
 	if(!obj->is_obj){
 		return 0;
