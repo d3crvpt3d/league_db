@@ -3,35 +3,33 @@
 #include <sys/types.h>
 
 #include "../include/jobject.h"
-
-
-int main(int argc, char **argv){
-
-	//TODO connect DuckDB
-	//...
-
+char *readFileToBuffer(char *filename){
+	
 	//Read file into buffer
 	FILE *fptr;
-	fptr = fopen(argv[1], "r");
+	fptr = fopen(filename, "r");
 	
-	if(!fptr){fprintf(stderr, "No such File %s\n", argv[1]); return -1;}
+	if(!fptr){fprintf(stderr, "No such File %s\n", filename); return NULL;}
 	
 	fseek(fptr, 0L, SEEK_END);
 	int size = ftell(fptr); 
 	char *text = malloc(sizeof(char) * size+1);
 	
-	if(!text){fprintf(stderr, "Can't get Heap Memory"); return -2;}
+	if(!text){fprintf(stderr, "Can't get Heap Memory"); return NULL;}
 	
 	rewind(fptr);
 	fread(text, 1, size, fptr);
 	fclose(fptr);
+	
+	return text;
+}
 
-	struct Bools {
-		char string: 1;
-		char key_value: 1;
-	};
+int main(int argc, char **argv){
 
-	struct Bools bools = {0};
+	//TODO connect DuckDB
+	//...
+	
+	char *text = readFileToBuffer(argv[1]);
 
 	//parse json
 	char in_string = 0;
@@ -42,14 +40,12 @@ int main(int argc, char **argv){
 	char *strStart = 0;
 	char is_obj = 0;
 	
-	struct JObject *currObj = createJObject();
-	struct JObject *currParent = 0;
-
 	//root obj
-	struct JObject *root = createJObject();
-
-	currObj = root;
-
+	JObject *root;
+	
+	//init root
+	createJObject(root, NULL, text)
+	
 	//skip first '{'
 	for(u_int32_t i = 1; text[i] != 0; i++){
 

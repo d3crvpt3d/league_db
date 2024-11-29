@@ -1,27 +1,21 @@
 #pragma once
 
-struct Element {
-	char *key;
-	void *value;	
-	int is_obj;
-};
+typedef struct JObject {
+	char *raw;//raw string to be parsed
 
-struct JObject {
-	
-	//array
+	int is_obj: 1;//true if raw[0] == '{'
 	long space;
 	long length;
-	struct Element *array;//dyn array of key/value pairs
+	
+	char *key;
+	void **value;//dyn array of object *, char *, int or double
+} JObject;
 
-	//parent back prop.
-	struct JObject *parent;
-};
-
-//malloc's itself with key
-struct JObject *createJObject(void);
+//malloc's itself with key and value
+void createJObject(JObject *address, char *key, char *raw);
 
 //free's recusively childs and itself
-int deleteJObject(struct JObject *obj);
+int deleteJObject(JObject *obj);
 
 //insert
-int appendToJObject(struct JObject *, struct Element);
+int appendToJObject(JObject *, JObject *);

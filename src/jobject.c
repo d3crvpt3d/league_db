@@ -1,33 +1,50 @@
 #include <stdlib.h>
+#include <sys/types.h>
 
 #include "../include/jobject.h"
 
-struct JObject *createJObject(){
-	
-	//get memory for this object
-	struct JObject *this = malloc(sizeof(struct JObject));
+//trim whitespaces
+char *trim(char *in){
 
-	//insert first key/data pair into child array
-	this->array = malloc(sizeof(struct Element));
-	if(!this->array){
-		return NULL;//cant malloc
+	u_int64_t front = 0;
+	u_int64_t back = 0;
+
+	//put back at last place
+	while(in[back] != '\0'){
+		back++;
 	}
-	this->length = 0;
-	this->space = 1;
-	this->parent = 0;
+	
+	//trim front
+	while (in[front++] == ' ' || in[front] == '\n' || in[front] == '\r' || in[front] == '\t'){
+		front++;
+	}
 
-	return this;
+	//trim back
+	do {
+		back--;	
+	} while (in[back] == ' ' || in[back] == '\n' || in[back] == '\r' || in[back] == '\t');
+
+	in[back+1] = '\0';
+
+	return in+front;//return trimmed string
+}
+
+void initJObject(JObject *address, char *key, char *raw_value){
+	
+	//trimmes raw to make shure '{' of object is at raw[0]
+	*address = (JObject) {trim(raw_value), raw_value[0] == '{', 1, 0, key, NULL};
 }
 
 //free childs, then yourself (recursive)
-int deleteJObject(struct JObject *obj){
+int deleteJObject(JObject *obj){
 
-	//recursive call for childs that are obj
+	//recursive call for childs
 	for(int i = 0; i < obj->length; i++){
 
-		if(obj->array[i].is_obj){
+		//
+		if( ((JObject *) obj->value[i])->is_obj ){
 		
-			if(!deleteJObject(obj->array[i].value)){
+			if(!deleteJObject(obj->value[i])){
 				return -3;
 			}
 		
@@ -36,36 +53,100 @@ int deleteJObject(struct JObject *obj){
 	}
 
 	//free array memory
-	free(obj->array);
+	free(obj->value);
+	obj->value = 0;
 
 	//free self
 	free(obj);
+	obj = 0;
 	
 	return 0;
 }
 
-int appendToJObject(struct JObject *obj, struct Element e){
+int appendToJObject(JObject *self, JObject *obj){
 
-	struct Element *tmp = 0;
+	JObject *tmp;
 
 	//realloc if full
-	if(obj->space == obj->length){
+	if(self->space == self->length){
 
 		//double space
-		obj->space = obj->space < 1;
-		tmp = realloc(obj->array, obj->space);
+		self->space = self->space * 2;
+		tmp = realloc(self->value, self->space);
 	
 		//check if realloc was successful
 		if(!tmp){
-			obj->space = obj->space > 1;
+			self->space = self->space / 2;
 			return -1;
 		}
 	}
 
-	obj->array = tmp;
-
 	//insert value and increment length
-	obj->array[obj->length++] = e;
+	self->value[self->length++] = obj;
+
+	return 0;
+}
+
+//turn raw into Elements aka. key/value pairs
+int parseObject(JObject *object){
+
+	//if escaped by '"' or not
+	int8_t in_string = 0;
+	char *strStart = 0;
+	
+	//read value as string into raw of child object
+	int8_t in_value = 0;
+	char *valStart = 0;
+
+	char *currKey = 0;
+
+	u_int64_t pos = 0;
+
+	//iterate raw data
+	while(object->raw[pos] != '\0'){
+
+		//check if end of value then append object with their raw data to parent
+		if(object->raw[pos] == ',' && !in_string){
+
+			JObject tmp;
+
+			object->raw[pos] = '\0';//set end of string
+
+			initJObject(&tmp, currKey, valStart);
+
+			in_value = 0;
+
+			continue;
+		}else if(in_value){//skip if in value
+			continue;
+		}
+
+		//skip if escaped or change state
+		if(object->raw[pos] == '"'){
+		
+			//save pos of start/end of string
+			if(in_string){
+				object->raw[pos] = '\0';
+				currKey = strStart;
+			}else{
+				strStart = &object->raw[pos+1]; 
+			}
+
+			in_string = !in_string;
+		}else if(in_string){
+			continue;
+		}
+
+		//switch on non escaped spectial characters
+		switch(object->raw[pos]){
+		
+			//colon = value start
+			case ':':
+				in_value = 1;
+				valStart = &object->raw[pos+1];
+				break;
+		}
+	}
 
 	return 0;
 }
