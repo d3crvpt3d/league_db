@@ -160,7 +160,7 @@ int recursiveParseJObject(JObject *obj){
 	parseObject(obj);
 
 	for(u_int64_t i = 0; i < obj->length; i++){
-		recursiveParseObject(obj->value[i]);
+		recursiveParseJObject(obj->value[i]);
 	}
 
 	return 0;
