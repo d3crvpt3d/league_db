@@ -3,6 +3,7 @@
 #include <sys/types.h>
 
 #include "../include/jobject.h"
+
 char *readFileToBuffer(char *filename){
 	
 	//Read file into buffer
@@ -44,7 +45,7 @@ int main(int argc, char **argv){
 	JObject *root;
 	
 	//init root
-	createJObject(root, NULL, text);
+	initJObject(root, NULL, text);
 
 	//recursive parse raw from childs
 	recursiveParseJObject(root);

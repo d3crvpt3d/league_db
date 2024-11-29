@@ -11,8 +11,7 @@ typedef struct JObject {
 	void **value;//dyn array of object *, char *, int or double
 } JObject;
 
-//malloc's itself with key and value
-void createJObject(JObject *address, char *key, char *raw);
+void initJObject(JObject *address, char *key, char *raw);
 
 //free's recusively childs and itself
 int deleteJObject(JObject *obj);
